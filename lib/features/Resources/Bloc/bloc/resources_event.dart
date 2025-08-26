@@ -17,3 +17,17 @@ final class UploadGLBEvent extends ResourcesEvent {
       this.thumbnailBytes,
       this.thumbnailName});
 }
+
+final class GetAllRoomsEvent extends ResourcesEvent {}
+
+final class GetAllItemsEvent extends ResourcesEvent {}
+
+final class EditItemEvent extends ResourcesEvent {
+  final int id;
+  final String name;
+  final String description;
+  final String price;
+  final Uint8List image;
+
+  EditItemEvent({required this.id,required this.name, required this.description, required this.price, required this.image});
+}

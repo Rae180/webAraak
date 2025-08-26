@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:start/core/api_service/network_api_service_http.dart';
 import 'package:start/features/Resources/Bloc/bloc/resources_bloc.dart';
 
@@ -11,7 +9,7 @@ class UploadGlbScreen extends StatefulWidget {
   static const String routeName = '/upload_glb';
   final String? itemId;
 
-  const UploadGlbScreen({super.key, this.itemId = '1'});
+  const UploadGlbScreen({super.key, this.itemId = '2'});
 
   @override
   State<UploadGlbScreen> createState() => _UploadGlbScreenState();
@@ -22,12 +20,10 @@ class _UploadGlbScreenState extends State<UploadGlbScreen> {
   PlatformFile? _thumbnailPlatformFile;
   String? _glbError;
   String? _thumbnailError;
-  late Flutter3DController _modelController;
 
   @override
   void initState() {
     super.initState();
-    _modelController = Flutter3DController();
   }
 
   Future<void> _pickGlbFile() async {
@@ -85,11 +81,6 @@ class _UploadGlbScreenState extends State<UploadGlbScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 3D Model Preview Section - Now shows uploaded model
-                  if (state is UploadedGLBSuccess)
-                    _buildModelViewer(context, state.glbUrl) // Added context
-                  else
-                    _buildFileSelectionPreview(context),
-                  const SizedBox(height: 24),
 
                   // File selection sections
                   if (state is! UploadedGLBSuccess) ...[
@@ -133,17 +124,6 @@ class _UploadGlbScreenState extends State<UploadGlbScreen> {
                           child: ElevatedButton(
                             onPressed: () => Navigator.pop(context),
                             child: const Text('BACK TO ITEM'),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => _viewInNewTab(
-                                context, (state as UploadedGLBSuccess).glbUrl),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[700],
-                            ),
-                            child: const Text('VIEW IN 3D'),
                           ),
                         ),
                       ],
@@ -247,72 +227,6 @@ class _UploadGlbScreenState extends State<UploadGlbScreen> {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildModelViewer(BuildContext context, String glbUrl) {
-    // Added context
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Uploaded Model Preview',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          height: 400,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Flutter3DViewer(
-            controller: _modelController,
-            src: glbUrl,
-            progressBarColor: Theme.of(context).primaryColor,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.play_arrow),
-              onPressed: () => _modelController.playAnimation(),
-              tooltip: 'Play Animation',
-            ),
-            IconButton(
-              icon: const Icon(Icons.pause),
-              onPressed: () => _modelController.pauseAnimation(),
-              tooltip: 'Pause Animation',
-            ),
-            IconButton(
-              icon: const Icon(Icons.replay),
-              onPressed: () => _modelController.resetAnimation(),
-              tooltip: 'Reset Animation',
-            ),
-            IconButton(
-              icon: const Icon(Icons.camera_alt),
-              onPressed: () => _modelController.resetCameraTarget(),
-              tooltip: 'Reset Camera',
-            ),
-            IconButton(
-              icon: const Icon(Icons.open_in_new),
-              onPressed: () => _viewInNewTab(context, glbUrl),
-              tooltip: 'Open in New Tab',
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  void _viewInNewTab(BuildContext context, String glbUrl) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opening $glbUrl in new tab')),
     );
   }
 

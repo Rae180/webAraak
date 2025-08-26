@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   bool _isExpanded = true;
 
-  static const List<Widget> _screens = [
+  static  List<Widget> _screens = [
     DashboardScreen(),
     ResourcesScreen(),
     SubGalleriesScreen(),
@@ -55,62 +55,59 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Row(
         children: [
-          // Sidebar Navigation
-          NavigationRail(
-            minWidth: _isExpanded ? 200 : 72,
-            extended: _isExpanded,
-            leading: _isExpanded 
-                ? Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.photo_library, size: 32),
-                        const SizedBox(width: 12),
-                        const Text('Gallery Manager', 
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        IconButton(
-                          icon: const Icon(Icons.menu_open),
-                          onPressed: () => setState(() => _isExpanded = !_isExpanded),
-                          iconSize: 20,
+          // Custom Sidebar
+          Container(
+            width: _isExpanded ? 200 : 72,
+            color: Colors.grey[100],
+            child: Column(
+              children: [
+                // Header
+                _isExpanded
+                    ? Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.photo_library, size: 28),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text('Gallery Manager',
+                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.menu_open, size: 20),
+                              onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: IconButton(
+                          icon: const Icon(Icons.menu),
+                          onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                        ),
+                      ),
+                const Divider(height: 1),
+                
+                // Menu Items
+                Expanded(
+                  child: ListView(
+                    children: [
+                      _buildSidebarItem(Icons.dashboard, 'Dashboard', 0),
+                      _buildSidebarItem(Icons.photo_library, 'Resources', 1),
+                      _buildSidebarItem(Icons.business, 'Sub-Galleries', 2),
+                      _buildSidebarItem(Icons.people, 'Users', 3),
+                      _buildSidebarItem(Icons.report, 'Reports', 4),
+                    ],
                   ),
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.dashboard),
-                label: Text('Dashboard'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.photo_library),
-                label: Text('Resources'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.business),
-                label: Text('Sub-Galleries'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.people),
-                label: Text('Users'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.report),
-                label: Text('Reports'),
-              ),
-            ],
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) {
-              setState(() => _selectedIndex = index);
-            },
-            labelType: _isExpanded 
-                ? NavigationRailLabelType.none 
-                : NavigationRailLabelType.selected,
+                ),
+              ],
+            ),
           ),
           const VerticalDivider(thickness: 1, width: 1),
+          
           // Main content
           Expanded(child: _screens[_selectedIndex]),
         ],
@@ -122,6 +119,33 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Theme.of(context).primaryColor,
             )
           : null,
+    );
+  }
+
+  Widget _buildSidebarItem(IconData icon, String label, int index) {
+    final isSelected = _selectedIndex == index;
+    
+    return InkWell(
+      onTap: () => setState(() => _selectedIndex = index),
+      child: Container(
+        color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        child: Row(
+          children: [
+            Icon(icon, color: isSelected ? Theme.of(context).primaryColor : Colors.grey[700]),
+            if (_isExpanded) ...[
+              const SizedBox(width: 16),
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Theme.of(context).primaryColor : Colors.grey[700],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 

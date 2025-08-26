@@ -138,6 +138,63 @@ class NetworkApiServiceHttp implements BaseApiService {
     }
   }
 
+  // Add this method to your NetworkApiServiceHttp class
+
+  Future<dynamic> multipartWithBytes({
+    required String url,
+    required Map<String, dynamic> jsonBody,
+    Uint8List? fileBytes,
+    String? filename,
+  }) async {
+    try {
+      String? token = PreferenceUtils.getString('token');
+      print('the token here is :$token');
+      print('url $url');
+      print('the posted body ${jsonBody.toString()}');
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(url),
+      );
+
+      // Add form fields
+      request = jsonToFormData(request, jsonBody);
+
+      // Add file bytes if provided
+      if (fileBytes != null) {
+        request.files.add(http.MultipartFile.fromBytes(
+          'image', // Field name for the image
+          fileBytes,
+          filename:
+              filename ?? 'upload.jpg', // Default filename if not provided
+        ));
+      }
+
+      print('request ${request.fields.toString()}');
+
+      request.headers['X-Requested-With'] = "XMLHttpRequest";
+      request.headers['content-type'] = "application/json; charset=utf-8";
+      request.headers['Authorization'] = "Bearer $token";
+
+      final response = await request.send();
+      final decodedResponse =
+          await DecodeResponse.decodeMultiplePartResponse(response);
+      return decodedResponse;
+    } on SocketException {
+      throw ExceptionSocket();
+    } on FormatException {
+      throw ExceptionFormat();
+    } on TimeoutException {
+      throw ExceptionTimeout();
+    } on HandshakeException {
+      throw ExceptionHandshake();
+    } on CustomException catch (e) {
+      throw CustomException(message: e.message);
+    } on Exception {
+      throw ExceptionOther();
+    }
+  }
+
   @override
   Future multipart(
       {required String url,
@@ -197,7 +254,7 @@ class NetworkApiServiceHttp implements BaseApiService {
     required Map<String, dynamic> files,
   }) async {
     try {
-     // String? token = PreferenceUtils.getString('token');
+      // String? token = PreferenceUtils.getString('token');
       var request = http.MultipartRequest('POST', Uri.parse(url));
 
       // Add form fields
@@ -248,6 +305,7 @@ class NetworkApiServiceHttp implements BaseApiService {
       // lan ??= 'en';
       String? token = PreferenceUtils.getString('token');
       print('url $url');
+      print('the token here is : $token');
 
       final response = await http.delete(
         Uri.parse(url),
@@ -257,7 +315,7 @@ class NetworkApiServiceHttp implements BaseApiService {
           'X-Requested-With': "XMLHttpRequest",
           //  "Locale": lan,
           "Accept": "application/json",
-          if (token != null) 'Authorization': token,
+          if (token != null) 'Authorization': 'Bearer $token',
         },
       );
 
