@@ -21,15 +21,19 @@ class Items {
     int? id;
     String? name;
     String? description;
-    double? price;
+    num? price;
+    num? time;
+    String? imageUrl;
 
-    Items({this.id, this.name, this.description, this.price});
+    Items({this.id, this.name, this.description, this.price, this.time, this.imageUrl});
 
     Items.fromJson(Map<String, dynamic> json) {
         id = json["id"];
         name = json["name"];
         description = json["description"];
         price = json["price"];
+        time = json["time"];
+        imageUrl = json["image_url"];
     }
 
     Map<String, dynamic> toJson() {
@@ -38,6 +42,8 @@ class Items {
         _data["name"] = name;
         _data["description"] = description;
         _data["price"] = price;
+        _data["time"] = time;
+        _data["image_url"] = imageUrl;
         return _data;
     }
 }

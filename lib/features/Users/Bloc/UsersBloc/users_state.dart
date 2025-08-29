@@ -18,6 +18,8 @@ final class GetOrdersUsersSuccess extends UsersState {
   GetOrdersUsersSuccess({required this.orders});
 }
 
+final class AddAmountSuccess extends UsersState {}
+
 final class UsersError extends UsersState {
   final String message;
 

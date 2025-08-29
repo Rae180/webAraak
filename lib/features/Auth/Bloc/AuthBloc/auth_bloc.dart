@@ -15,6 +15,27 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final NetworkApiServiceHttp client;
   AuthBloc({required this.client}) : super(AuthInitial()) {
+    on<LogoutEvent>(((event, emit) async {
+      emit(AuthLoading());
+      final result = await BaseRepo.repoRequest(request: () async {
+        final response = await client
+            .postRequestAuth(url: ApiConstants.logout, jsonBody: {});
+        return response;
+      });
+
+      // Correct way to handle Either
+     await result.fold(
+        (failure) {
+          emit(_mapFailureToState(failure));
+        },
+        (responseData) async {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.remove('token');
+          print("Token removed on logout");
+          emit(LogoutSuccess());
+        },
+      );
+    }));
     on<LoginEvent>((event, emit) async {
       emit(AuthLoading()); // Add a loading state
 

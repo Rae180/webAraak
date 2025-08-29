@@ -60,7 +60,28 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   Widget _buildBody(BuildContext context, Color textColor) {
-    return BlocBuilder<UsersBloc, UsersState>(
+    return BlocConsumer<UsersBloc, UsersState>(
+      listener: (context, state) {
+        if (state is AddAmountSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'تم إضافة الرصيد بنجاح',
+                style: TextStyle(fontFamily: AppConstants.primaryFont),
+              ),
+            ),
+          );
+        } else if (state is UsersError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.message,
+                style: TextStyle(fontFamily: AppConstants.primaryFont),
+              ),
+            ),
+          );
+        }
+      },
       builder: (context, state) {
         if (state is UsersLoading) {
           return _buildShimmerLoader();
@@ -155,6 +176,13 @@ class _UsersScreenState extends State<UsersScreen> {
             fontFamily: AppConstants.primaryFont,
           ),
         ),
+        trailing: IconButton(
+          icon: Icon(
+            Icons.account_balance_wallet,
+            color: Theme.of(context).primaryColor,
+          ),
+          onPressed: () => _showAddBalanceDialog(context, user),
+        ),
         onTap: () {
           Navigator.push(
             context,
@@ -167,6 +195,102 @@ class _UsersScreenState extends State<UsersScreen> {
           );
         },
       ),
+    );
+  }
+
+  void _showAddBalanceDialog(BuildContext context, Customers user) {
+    final _formKey = GlobalKey<FormState>();
+    final _amountController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'إضافة رصيد للمستخدم',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: AppConstants.primaryFont,
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _amountController,
+                    decoration: InputDecoration(
+                      labelText: 'المبلغ',
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.cardRadius),
+                      ),
+                      prefixIcon: const Icon(Icons.attach_money),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'يرجى إدخال المبلغ';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return 'يرجى إدخال رقم صحيح';
+                      }
+                      if (double.parse(value) <= 0) {
+                        return 'يرجى إدخال مبلغ أكبر من الصفر';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'إلغاء',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onBackground,
+                            fontFamily: AppConstants.primaryFont,
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          print('the user id is :${user.id}');
+                          if (_formKey.currentState!.validate()) {
+                            context.read<UsersBloc>().add(
+                                  AddAmountEvent(
+                                    id: user.id!,
+                                    amount: _amountController.text,
+                                  ),
+                                );
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Text(
+                          'إضافة',
+                          style:
+                              TextStyle(fontFamily: AppConstants.primaryFont),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

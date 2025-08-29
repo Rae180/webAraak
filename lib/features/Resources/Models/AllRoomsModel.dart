@@ -22,14 +22,18 @@ class Rooms {
     String? name;
     String? imageUrl;
     String? description;
+    num? price;
+    String? time;
 
-    Rooms({this.id, this.name, this.imageUrl, this.description});
+    Rooms({this.id, this.name, this.imageUrl, this.description, this.price, this.time});
 
     Rooms.fromJson(Map<String, dynamic> json) {
         id = json["id"];
         name = json["name"];
         imageUrl = json["image_url"];
         description = json["description"];
+        price = json["price"];
+        time = json["time"];
     }
 
     Map<String, dynamic> toJson() {
@@ -38,6 +42,8 @@ class Rooms {
         _data["name"] = name;
         _data["image_url"] = imageUrl;
         _data["description"] = description;
+        _data["price"] = price;
+        _data["time"] = time;
         return _data;
     }
 }

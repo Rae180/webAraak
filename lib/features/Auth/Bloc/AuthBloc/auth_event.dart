@@ -8,3 +8,5 @@ final class LoginEvent extends AuthEvent {
 
   LoginEvent({required this.email, required this.password});
 }
+
+final class LogoutEvent extends AuthEvent {}

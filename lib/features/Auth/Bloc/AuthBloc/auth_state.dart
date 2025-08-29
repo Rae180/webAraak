@@ -8,6 +8,8 @@ final class AuthLoading extends AuthState {}
 
 final class LoginSucess extends AuthState {}
 
+final class LogoutSuccess extends AuthState {}
+
 final class AuthError extends AuthState {
   final String message;
 

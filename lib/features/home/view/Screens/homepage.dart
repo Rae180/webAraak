@@ -6,6 +6,7 @@ import 'package:start/features/Resources/view/Screens/AddItemScreen.dart';
 import 'package:start/features/Resources/view/Screens/AddRoomScreen.dart';
 import 'package:start/features/Resources/view/Screens/ResourcesScreen.dart';
 import 'package:start/features/Resources/view/Screens/UploadGlbScreen.dart';
+import 'package:start/features/Settings/View/Screens/SettingsScreen.dart';
 import 'package:start/features/SubGallery/view/Screens/SubGalleriesScreen.dart';
 import 'package:start/features/Users/view/Screens/UsersScreen.dart';
 
@@ -21,7 +22,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   bool _isExpanded = true;
 
-  static  List<Widget> _screens = [
+  static List<Widget> _screens = [
     DashboardScreen(),
     ResourcesScreen(),
     SubGalleriesScreen(),
@@ -49,7 +50,9 @@ class _HomePageState extends State<HomePage> {
           ),
           IconButton(
             icon: const Icon(Icons.account_circle),
-            onPressed: () => _showProfileMenu(context),
+            onPressed: () {
+              Navigator.of(context).pushNamed(SettingsScreen.routeName);
+            },
           ),
         ],
       ),
@@ -71,11 +74,13 @@ class _HomePageState extends State<HomePage> {
                             const SizedBox(width: 12),
                             const Expanded(
                               child: Text('Gallery Manager',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                             IconButton(
                               icon: const Icon(Icons.menu_open, size: 20),
-                              onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                              onPressed: () =>
+                                  setState(() => _isExpanded = !_isExpanded),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                             ),
@@ -86,11 +91,12 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: IconButton(
                           icon: const Icon(Icons.menu),
-                          onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                          onPressed: () =>
+                              setState(() => _isExpanded = !_isExpanded),
                         ),
                       ),
                 const Divider(height: 1),
-                
+
                 // Menu Items
                 Expanded(
                   child: ListView(
@@ -107,24 +113,17 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const VerticalDivider(thickness: 1, width: 1),
-          
+
           // Main content
           Expanded(child: _screens[_selectedIndex]),
         ],
       ),
-      floatingActionButton: _selectedIndex == 1
-          ? FloatingActionButton(
-              onPressed: () => _showAddResourceDialog(context),
-              child: const Icon(Icons.add),
-              backgroundColor: Theme.of(context).primaryColor,
-            )
-          : null,
     );
   }
 
   Widget _buildSidebarItem(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
-    
+
     return InkWell(
       onTap: () => setState(() => _selectedIndex = index),
       child: Container(
@@ -132,40 +131,24 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Row(
           children: [
-            Icon(icon, color: isSelected ? Theme.of(context).primaryColor : Colors.grey[700]),
+            Icon(icon,
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey[700]),
             if (_isExpanded) ...[
               const SizedBox(width: 16),
               Text(
                 label,
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Theme.of(context).primaryColor : Colors.grey[700],
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey[700],
                 ),
               ),
             ],
           ],
         ),
-      ),
-    );
-  }
-
-  void _showProfileMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () => Navigator.pop(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () => Navigator.pushReplacementNamed(context, LoginPage.routeName),
-          ),
-        ],
       ),
     );
   }

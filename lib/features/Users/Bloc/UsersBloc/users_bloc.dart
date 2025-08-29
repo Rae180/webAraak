@@ -15,6 +15,21 @@ part 'users_state.dart';
 class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final BaseApiService client;
   UsersBloc({required this.client}) : super(UsersInitial()) {
+    on<AddAmountEvent>(((event, emit) async {
+      final result = await BaseRepo.repoRequest(request: () async {
+        final response = await client.postRequestAuth(
+            url: ApiConstants.addmount + event.id.toString(),
+            jsonBody: {
+              "amount": event.amount,
+            });
+        return response;
+      });
+      result.fold((f) {
+        emit(_mapFailureToState(f));
+      }, (responseData) {
+        emit(AddAmountSuccess());
+      });
+    }));
     on<GetAllUsersEvent>((event, emit) async {
       emit(UsersLoading());
       final result = await BaseRepo.repoRequest(request: () async {

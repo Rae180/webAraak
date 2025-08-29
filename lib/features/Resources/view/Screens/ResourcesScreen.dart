@@ -7,9 +7,15 @@ import 'package:start/features/Resources/Bloc/bloc/resources_bloc.dart';
 import 'package:start/features/Resources/Models/AllItemsModel.dart';
 import 'package:start/features/Resources/Models/AllRoomsModel.dart';
 import 'package:start/features/Resources/view/Screens/AddItemScreen.dart';
+import 'package:start/features/Resources/view/Screens/AddNewFabricScreen.dart';
+import 'package:start/features/Resources/view/Screens/AddNewWoodScreen.dart';
 import 'package:start/features/Resources/view/Screens/AddRoomScreen.dart';
+import 'package:start/features/Resources/view/Screens/AllFabricScreen.dart';
+import 'package:start/features/Resources/view/Screens/AllWoodScreen.dart';
+import 'package:start/features/Resources/view/Screens/CategoriesScreen.dart';
 import 'package:start/features/Resources/view/Screens/EditItemScreen.dart';
 import 'package:start/features/Resources/view/Screens/EditRoomScreen.dart';
+import 'package:start/features/Resources/view/Screens/ItemTypesScreen.dart';
 import 'package:start/features/Resources/view/Screens/UploadGlbScreen.dart';
 
 class ResourcesScreen extends StatefulWidget {
@@ -56,10 +62,264 @@ class _ResourcesScreenState extends State<ResourcesScreen>
     }
   }
 
-  void _showAddOptionsDialog(BuildContext context) {
+  void _handleRefresh() {
+    if (_tabController.index == 0) {
+      _resourcesBloc.add(GetAllItemsEvent());
+      setState(() {
+        _itemsLoaded = false;
+      });
+    } else if (_tabController.index == 1) {
+      _resourcesBloc.add(GetAllRoomsEvent());
+      setState(() {
+        _roomsLoaded = false;
+      });
+    }
+  }
+
+  void _showAddCategoryDialog(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    final _nameController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        return BlocListener<ResourcesBloc, ResourcesState>(
+          listener: (context, state) {
+            if (state is AddNewCategorySuccess) {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'تمت إضافة التصنيف بنجاح',
+                    style: TextStyle(fontFamily: AppConstants.primaryFont),
+                  ),
+                ),
+              );
+            }
+            if (state is ResourcesError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    state.message,
+                    style: TextStyle(fontFamily: AppConstants.primaryFont),
+                  ),
+                ),
+              );
+            }
+          },
+          child: Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'إضافة تصنيف جديد',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: AppConstants.primaryFont,
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'اسم التصنيف',
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.cardRadius),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال اسم التصنيف';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'إلغاء',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onBackground,
+                              fontFamily: AppConstants.primaryFont,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              _resourcesBloc.add(
+                                AddNewCategoryEvent(
+                                  name: _nameController.text,
+                                ),
+                              );
+                            }
+                          },
+                          child: Text(
+                            'حفظ',
+                            style:
+                                TextStyle(fontFamily: AppConstants.primaryFont),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAddItemTypeDialog(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    final _nameController = TextEditingController();
+    final _descriptionController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BlocListener<ResourcesBloc, ResourcesState>(
+          listener: (context, state) {
+            if (state is AddItemTypeSuccess) {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'تم إضافة نوع العنصر بنجاح',
+                    style: TextStyle(fontFamily: AppConstants.primaryFont),
+                  ),
+                ),
+              );
+            }
+            if (state is ResourcesError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    state.message,
+                    style: TextStyle(fontFamily: AppConstants.primaryFont),
+                  ),
+                ),
+              );
+            }
+          },
+          child: Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'إضافة نوع عنصر جديد',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: AppConstants.primaryFont,
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'اسم النوع',
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.cardRadius),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال اسم النوع';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: InputDecoration(
+                        labelText: 'الوصف',
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.cardRadius),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'يرجى إدخال وصف النوع';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'إلغاء',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onBackground,
+                              fontFamily: AppConstants.primaryFont,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              _resourcesBloc.add(
+                                AddItemTypeEvent(
+                                  name: _nameController.text,
+                                  description: _descriptionController.text,
+                                ),
+                              );
+                            }
+                          },
+                          child: Text(
+                            'حفظ',
+                            style: TextStyle(
+                              fontFamily: AppConstants.primaryFont,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAddOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.cardRadius),
@@ -80,11 +340,11 @@ class _ResourcesScreenState extends State<ResourcesScreen>
                 ),
                 const SizedBox(height: 20),
                 _buildOptionButton(
-                  context,
+                  dialogContext,
                   icon: Icons.chair,
                   label: 'إضافة عنصر جديد',
                   onTap: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop();
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => BlocProvider.value(
@@ -97,11 +357,11 @@ class _ResourcesScreenState extends State<ResourcesScreen>
                 ),
                 const SizedBox(height: 12),
                 _buildOptionButton(
-                  context,
+                  dialogContext,
                   icon: Icons.room,
                   label: 'إضافة غرفة جديدة',
                   onTap: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop();
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => BlocProvider.value(
@@ -114,11 +374,11 @@ class _ResourcesScreenState extends State<ResourcesScreen>
                 ),
                 const SizedBox(height: 12),
                 _buildOptionButton(
-                  context,
+                  dialogContext,
                   icon: Icons.model_training,
                   label: 'رفع نموذج 3D',
                   onTap: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop();
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => BlocProvider.value(
@@ -129,9 +389,9 @@ class _ResourcesScreenState extends State<ResourcesScreen>
                     );
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(dialogContext),
                   child: Text(
                     'إلغاء',
                     style: TextStyle(
@@ -221,6 +481,49 @@ class _ResourcesScreenState extends State<ResourcesScreen>
         labelColor: Theme.of(context).primaryColor,
         unselectedLabelColor: Colors.grey,
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.category_outlined),
+          tooltip: 'أنواع العناصر',
+          onPressed: () {
+            Navigator.of(context).pushNamed(ItemTypesScreen.routeName);
+            // or:
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(builder: (_) => const ItemTypesScreen()),
+            // );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.list_alt_outlined),
+          tooltip: 'التصنيفات',
+          onPressed: () {
+            Navigator.of(context).pushNamed(CategoriesScreen.routeName);
+            // or:
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(builder: (_) => const CategoriesScreen()),
+            // );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.forest_outlined),
+          tooltip: 'All Wood',
+          onPressed: () {
+            Navigator.of(context).pushNamed(AllWoodScreen.routeName);
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.line_style_outlined),
+          tooltip: 'All Fabric',
+          onPressed: () {
+            Navigator.of(context).pushNamed(AllFabricScreen.routeName);
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: _handleRefresh,
+          tooltip: 'تحديث',
+        ),
+      ],
       centerTitle: true,
     );
   }
@@ -300,10 +603,16 @@ class _ResourcesScreenState extends State<ResourcesScreen>
             leading: CircleAvatar(
               radius: 25,
               backgroundColor: Colors.transparent,
-              child: Icon(
-                Icons.chair,
-                color: Theme.of(context).primaryColor,
-              ),
+              backgroundImage:
+                  item.imageUrl != null && item.imageUrl!.isNotEmpty
+                      ? NetworkImage(item.imageUrl!)
+                      : null,
+              child: item.imageUrl == null || item.imageUrl!.isEmpty
+                  ? Icon(
+                      Icons.chair,
+                      color: Theme.of(context).primaryColor,
+                    )
+                  : null,
             ),
             title: Text(
               item.name ?? 'No Name',
@@ -313,12 +622,51 @@ class _ResourcesScreenState extends State<ResourcesScreen>
                 fontWeight: FontWeight.bold,
               ),
             ),
-            subtitle: Text(
-              item.description ?? 'No Description',
-              style: TextStyle(
-                color: textColor.withOpacity(0.7),
-                fontFamily: AppConstants.primaryFont,
-              ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.description ?? 'No Description',
+                  style: TextStyle(
+                    color: textColor.withOpacity(0.7),
+                    fontFamily: AppConstants.primaryFont,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.attach_money,
+                      size: 14,
+                      color: textColor.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${item.price ?? 'N/A'}',
+                      style: TextStyle(
+                        color: textColor.withOpacity(0.7),
+                        fontFamily: AppConstants.primaryFont,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.access_time,
+                      size: 14,
+                      color: textColor.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${item.time ?? 'N/A'} دقيقة',
+                      style: TextStyle(
+                        color: textColor.withOpacity(0.7),
+                        fontFamily: AppConstants.primaryFont,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -332,12 +680,16 @@ class _ResourcesScreenState extends State<ResourcesScreen>
                     if (item != null) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => EditItemScreen(item: item),
+                          builder: (context) => BlocProvider.value(
+                            value: _resourcesBloc,
+                            child: EditItemScreen(item: item),
+                          ),
                         ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Cannot edit a null item')),
+                        const SnackBar(
+                            content: Text('Cannot edit a null item')),
                       );
                     }
                   },
@@ -440,12 +792,51 @@ class _ResourcesScreenState extends State<ResourcesScreen>
                 fontWeight: FontWeight.bold,
               ),
             ),
-            subtitle: Text(
-              room.description ?? 'No Description',
-              style: TextStyle(
-                color: textColor.withOpacity(0.7),
-                fontFamily: AppConstants.primaryFont,
-              ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  room.description ?? 'No Description',
+                  style: TextStyle(
+                    color: textColor.withOpacity(0.7),
+                    fontFamily: AppConstants.primaryFont,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.attach_money,
+                      size: 14,
+                      color: textColor.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${room.price ?? 'N/A'}',
+                      style: TextStyle(
+                        color: textColor.withOpacity(0.7),
+                        fontFamily: AppConstants.primaryFont,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.access_time,
+                      size: 14,
+                      color: textColor.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${room.time ?? 'N/A'} دقيقة',
+                      style: TextStyle(
+                        color: textColor.withOpacity(0.7),
+                        fontFamily: AppConstants.primaryFont,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -456,14 +847,14 @@ class _ResourcesScreenState extends State<ResourcesScreen>
                     color: Theme.of(context).primaryColor,
                   ),
                   onPressed: () {
-                    // Navigator.of(context).push(
-                    //   MaterialPageRoute(
-                    //     builder: (context) => BlocProvider.value(
-                    //       value: _resourcesBloc,
-                    //       child: EditRoomScreen(room: room),
-                    //     ),
-                    //   ),
-                    // );
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => BlocProvider.value(
+                          value: _resourcesBloc,
+                          child: EditRoomScreen(room: room),
+                        ),
+                      ),
+                    );
                   },
                 ),
                 IconButton(
@@ -541,16 +932,16 @@ class _ResourcesScreenState extends State<ResourcesScreen>
             ),
             ElevatedButton(
               onPressed: () {
-                // Navigator.of(dialogContext).pop();
-                // _resourcesBloc.add(DeleteItemEvent(itemId: item.id!));
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(
-                //     content: Text(
-                //       'سيتم حذف العنصر قريباً',
-                //       style: TextStyle(fontFamily: AppConstants.primaryFont),
-                //     ),
-                //   ),
-                // );
+                Navigator.of(dialogContext).pop();
+                _resourcesBloc.add(DeleteItemEvent(id: item.id!));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'سيتم حذف العنصر قريباً',
+                      style: TextStyle(fontFamily: AppConstants.primaryFont),
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
@@ -597,16 +988,16 @@ class _ResourcesScreenState extends State<ResourcesScreen>
             ),
             ElevatedButton(
               onPressed: () {
-                // Navigator.of(dialogContext).pop();
-                // _resourcesBloc.add(DeleteRoomEvent(roomId: room.id!));
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(
-                //     content: Text(
-                //       'سيتم حذف الغرفة قريباً',
-                //       style: TextStyle(fontFamily: AppConstants.primaryFont),
-                //     ),
-                //   ),
-                // );
+                Navigator.of(dialogContext).pop();
+                _resourcesBloc.add(DeleteRoomEvent(id: room.id!));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'سيتم حذف الغرفة قريباً',
+                      style: TextStyle(fontFamily: AppConstants.primaryFont),
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
